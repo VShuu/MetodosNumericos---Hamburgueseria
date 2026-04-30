@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BurgerMath — Métodos Numéricos</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&family=DM+Sans:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.min.js"></script>
+</head>
+<body>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-smoke"></div>
+    <nav class="nav">
+      <div class="nav-logo">🍔 BurgerMath</div>
+      <div class="nav-links">
+        <a href="#problema">Problema</a>
+        <a href="#metodos">Métodos</a>
+        <a href="#gradiente">Gradiente</a>
+        <a href="#interactivo">Simulador</a>
+        <a href="#resultados">Resultados</a>
+      </div>
+    </nav>
+    <div class="hero-content">
+      <div class="hero-badge">Métodos Numéricos · Victor Alberto Machaca Calle</div>
+      <h1 class="hero-title">
+        <span class="line2">la Hamburguesería</span>
+      </h1>
+      <p class="hero-sub">Sistemas de ecuaciones lineales · Factorización LU · Jacobi · Gauss-Seidel · SOR · Gradiente Conjugado</p>
+      <a href="#problema" class="btn-hero">Comenzar el viaje ↓</a>
+    </div>
+    <div class="hero-ingredients">
+      <span class="ing ing1">🥩</span>
+      <span class="ing ing2">🧀</span>
+      <span class="ing ing3">🥬</span>
+      <span class="ing ing4">🍞</span>
+      <span class="ing ing5">🧅</span>
+      <span class="ing ing6">🍅</span>
+    </div>
+  </header>
+
+  <!-- SECCIÓN: PROBLEMA -->
+  <section id="problema" class="section section-dark">
+    <div class="container">
+      <div class="section-label">01 — Planteamiento</div>
+      <h2 class="section-title">El Problema Real</h2>
+      <div class="problem-grid">
+        <div class="problem-text">
+          <p>Una hamburguesería debe decidir cuántas unidades de cada ingrediente principal preparar cada día para satisfacer la demanda, respetar el inventario y maximizar la eficiencia.</p>
+          <p>Modelamos esto como un <strong>sistema de ecuaciones lineales Ax = b</strong>, donde el equilibrio entre recursos, producción y demanda queda capturado algebraicamente.</p>
+        </div>
+        <div class="vars-card">
+          <h3>Variables del sistema</h3>
+          <div class="var-item">
+            <span class="var-sym">x₁</span>
+            <div>
+              <strong>Carne (kg)</strong>
+              <span>Cantidad de carne preparada por turno</span>
+            </div>
+          </div>
+          <div class="var-item">
+            <span class="var-sym">x₂</span>
+            <div>
+              <strong>Pan (unidades)</strong>
+              <span>Panes frescos disponibles por turno</span>
+            </div>
+          </div>
+          <div class="var-item">
+            <span class="var-sym">x₃</span>
+            <div>
+              <strong>Ingredientes extra</strong>
+              <span>Queso, salsas y vegetales (porciones)</span>
+            </div>
+          </div>
+          <div class="var-item b-item">
+            <span class="var-sym">b</span>
+            <div>
+              <strong>Términos independientes</strong>
+              <span>Restricciones de demanda, presupuesto y capacidad de almacenamiento</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRES ESCENARIOS -->
+      <h3 class="subsection-title">Los tres escenarios</h3>
+      <div class="scenarios-grid">
+        <div class="scenario-card ideal">
+          <div class="sc-icon">✅</div>
+          <h4>Caso Ideal</h4>
+          <p>Sistema consistente y bien condicionado. Coeficientes equilibrados representan una demanda normal. Todos los métodos convergen rápidamente.</p>
+          <div class="matrix-display" id="mat-ideal"></div>
+        </div>
+        <div class="scenario-card stress">
+          <div class="sc-icon">🔥</div>
+          <h4>Caso Bajo Estrés</h4>
+          <p>Alta demanda: coeficientes grandes. Simula un evento especial o fin de semana. Pone a prueba la estabilidad de los métodos iterativos.</p>
+          <div class="matrix-display" id="mat-stress"></div>
+        </div>
+        <div class="scenario-card ill">
+          <div class="sc-icon">⚠️</div>
+          <h4>Caso Mal Condicionado</h4>
+          <p>Ingredientes casi equivalentes generan problemas numéricos. El número de condición es muy alto. Ideal para demostrar el valor del precondicionamiento.</p>
+          <div class="matrix-display" id="mat-ill"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN: TEORÍA MÉTODOS -->
+  <section id="metodos" class="section section-light">
+    <div class="container">
+      <div class="section-label">02 — Fundamentos</div>
+      <h2 class="section-title">Métodos Numéricos</h2>
+      <div class="methods-tabs">
+        <button class="tab-btn active" data-tab="lu">Factorización LU</button>
+        <button class="tab-btn" data-tab="jacobi">Jacobi</button>
+        <button class="tab-btn" data-tab="gs">Gauss-Seidel</button>
+        <button class="tab-btn" data-tab="sor">SOR</button>
+        <button class="tab-btn" data-tab="cg">Grad. Conjugado</button>
+      </div>
+      <div class="tab-content active" id="tab-lu">
+        <div class="method-explain">
+          <div class="method-theory">
+            <h3>Factorización LU</h3>
+            <p>Descompone la matriz A en el producto de una matriz triangular inferior L y una triangular superior U, tal que <code>A = LU</code>. Luego resuelve dos sistemas triangulares:</p>
+            <ul>
+              <li><strong>Ly = b</strong> (sustitución hacia adelante)</li>
+              <li><strong>Ux = y</strong> (sustitución hacia atrás)</li>
+            </ul>
+            <p>En el contexto de la hamburguesería: una vez factorizada A, podemos resolver para múltiples vectores b (distintos días) de forma eficiente.</p>
+            <div class="complexity-badge">O(n³) factorización · O(n²) por solución</div>
+          </div>
+          <div class="method-algo">
+            <pre><code>ALGORITMO LU (con pivoteo parcial)
+Para k = 0 a n-1:
+  Encontrar fila pivot (max |A[i][k]|, i≥k)
+  Intercambiar filas k y pivot
+  Para i = k+1 a n-1:
+    m = A[i][k] / A[k][k]   ← multiplicador
+    L[i][k] = m
+    Para j = k a n-1:
+      A[i][j] -= m * A[k][j]
+Resolver Ly = Pb (sustitución ↓)
+Resolver Ux = y  (sustitución ↑)</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-jacobi">
+        <div class="method-explain">
+          <div class="method-theory">
+            <h3>Método de Jacobi</h3>
+            <p>Método iterativo que actualiza <em>todas</em> las variables simultáneamente usando los valores de la iteración anterior:</p>
+            <p class="formula">x<sup>(k+1)</sup><sub>i</sub> = (b<sub>i</sub> − Σ<sub>j≠i</sub> a<sub>ij</sub> x<sup>(k)</sup><sub>j</sub>) / a<sub>ii</sub></p>
+            <p>Requiere diagonal dominante para garantizar convergencia. En la hamburguesería: cada ingrediente se recalcula independientemente.</p>
+            <div class="complexity-badge">Convergencia: O(ρ(D⁻¹(L+U))^k)</div>
+          </div>
+          <div class="method-algo">
+            <pre><code>ALGORITMO JACOBI
+x = x0  (vector inicial, ej: ceros)
+Para iter = 1 a MAX_ITER:
+  Para i = 0 a n-1:
+    suma = 0
+    Para j = 0 a n-1:
+      Si j ≠ i: suma += A[i][j] * x[j]
+    x_nuevo[i] = (b[i] - suma) / A[i][i]
+  error = ||x_nuevo - x|| / ||x_nuevo||
+  x = x_nuevo
+  Si error < tol: CONVERGIÓ ✓</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-gs">
+        <div class="method-explain">
+          <div class="method-theory">
+            <h3>Gauss-Seidel</h3>
+            <p>Mejora sobre Jacobi: usa los valores <em>ya actualizados</em> en la misma iteración. Converge aproximadamente el doble de rápido:</p>
+            <p class="formula">x<sup>(k+1)</sup><sub>i</sub> = (b<sub>i</sub> − Σ<sub>j&lt;i</sub> a<sub>ij</sub> x<sup>(k+1)</sup><sub>j</sub> − Σ<sub>j&gt;i</sub> a<sub>ij</sub> x<sup>(k)</sup><sub>j</sub>) / a<sub>ii</sub></p>
+            <p>En la hamburguesería: al ajustar un ingrediente, inmediatamente influye en el cálculo del siguiente.</p>
+            <div class="complexity-badge">~2× más rápido que Jacobi</div>
+          </div>
+          <div class="method-algo">
+            <pre><code>ALGORITMO GAUSS-SEIDEL
+x = x0
+Para iter = 1 a MAX_ITER:
+  Para i = 0 a n-1:
+    suma = 0
+    Para j = 0 a n-1:
+      Si j ≠ i: suma += A[i][j] * x[j]
+      // Usa x[j] ya actualizado si j < i
+    x[i] = (b[i] - suma) / A[i][i]
+  error = ||Ax - b|| / ||b||
+  Si error < tol: CONVERGIÓ ✓</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-sor">
+        <div class="method-explain">
+          <div class="method-theory">
+            <h3>SOR — Relajación Sucesiva</h3>
+            <p>Generaliza Gauss-Seidel con un factor de relajación ω ∈ (0, 2):</p>
+            <p class="formula">x<sup>(k+1)</sup><sub>i</sub> = (1−ω)x<sup>(k)</sup><sub>i</sub> + ω·x<sup>GS</sup><sub>i</sub></p>
+            <ul>
+              <li>ω = 1: equivale a Gauss-Seidel</li>
+              <li>ω &lt; 1: sub-relajación (estabiliza)</li>
+              <li>ω &gt; 1: sobre-relajación (acelera)</li>
+            </ul>
+            <p>Para la hamburguesería bajo estrés, ajustar ω puede reducir drásticamente las iteraciones.</p>
+            <div class="complexity-badge">ω óptimo ≈ 2/(1+√(1-ρ²))</div>
+          </div>
+          <div class="method-algo">
+            <pre><code>ALGORITMO SOR (ω parametrizable)
+x = x0
+Para iter = 1 a MAX_ITER:
+  Para i = 0 a n-1:
+    sigma = 0
+    Para j = 0 a n-1:
+      Si j ≠ i: sigma += A[i][j] * x[j]
+    x_gs = (b[i] - sigma) / A[i][i]
+    x[i] = (1 - ω) * x[i] + ω * x_gs
+  error = ||Ax - b|| / ||b||
+  Si error < tol: CONVERGIÓ ✓</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-cg">
+        <div class="method-explain">
+          <div class="method-theory">
+            <h3>Gradiente Conjugado Precondicionado</h3>
+            <p>El método del gradiente conjugado resuelve <strong>Ax = b</strong> minimizando la función cuadrática <code>f(x) = ½xᵀAx − bᵀx</code> siguiendo direcciones de búsqueda conjugadas (A-ortogonales).</p>
+            <p>El <strong>precondicionador M</strong> transforma el sistema a <code>M⁻¹Ax = M⁻¹b</code>, reduciendo el número de condición y acelerando la convergencia dramáticamente para el caso mal condicionado.</p>
+            <div class="complexity-badge">Converge en ≤ n iteraciones (exacto) · O(κ^½) con precond.</div>
+          </div>
+          <div class="method-algo">
+            <pre><code>ALGORITMO PCG (Precondicionado)
+x = x0; r = b - A*x
+z = M⁻¹ * r  (aplicar precondicionador)
+p = z; rz = r·z
+Para iter = 1 a MAX_ITER:
+  Ap = A * p
+  α = rz / (pᵀ Ap)    ← paso óptimo
+  x = x + α*p
+  r = r - α*Ap
+  Si ||r|| < tol: CONVERGIÓ ✓
+  z = M⁻¹ * r
+  rz_nuevo = r·z
+  β = rz_nuevo / rz    ← conjugación
+  p = z + β*p
+  rz = rz_nuevo</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN: GRADIENTE -->
+  <section id="gradiente" class="section section-dark">
+    <div class="container">
+      <div class="section-label">03 — Optimización</div>
+      <h2 class="section-title">El Enfoque del Gradiente</h2>
+      <div class="gradient-layout">
+        <div class="gradient-theory">
+          <div class="eq-box">
+            <span class="eq-label">Función a minimizar</span>
+            <span class="eq-math">f(x) = ½ xᵀAx − bᵀx + c</span>
+          </div>
+          <div class="eq-box highlight">
+            <span class="eq-label">Condición de óptimo</span>
+            <span class="eq-math">∇f(x) = Ax − b = 0</span>
+          </div>
+          <div class="eq-box">
+            <span class="eq-label">Equivalente a resolver</span>
+            <span class="eq-math">Ax = b ✓</span>
+          </div>
+          <p class="gradient-interp">
+            <strong>Interpretación hamburguesera:</strong> el gradiente ∇f(x) indica en qué dirección y cuánto ajustar los ingredientes para reducir el "error" entre la producción actual y la demanda óptima. Cuando ∇f = 0, hemos encontrado el punto de equilibrio perfecto.
+          </p>
+          <div class="cond-box">
+            <h4>Número de condición κ(A)</h4>
+            <p>κ(A) = ‖A‖ · ‖A⁻¹‖ = λ<sub>max</sub>/λ<sub>min</sub></p>
+            <ul>
+              <li><strong>κ ≈ 1:</strong> bien condicionado, convergencia rápida</li>
+              <li><strong>κ ≫ 1:</strong> mal condicionado, convergencia lenta o inestable</li>
+              <li><strong>Precondicionador:</strong> reduce κ(M⁻¹A) ≪ κ(A)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="gradient-visual">
+          <canvas id="contourChart" width="420" height="380"></canvas>
+          <p class="chart-caption">Curvas de nivel de f(x) y trayectoria del gradiente conjugado</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN: SIMULADOR INTERACTIVO -->
+  <section id="interactivo" class="section section-amber">
+    <div class="container">
+      <div class="section-label">04 — Simulador</div>
+      <h2 class="section-title">Laboratorio Interactivo</h2>
+      <p class="section-intro">Modifica los coeficientes, elige el método y observa la convergencia en tiempo real.</p>
+
+      <div class="sim-layout">
+        <!-- Panel izquierdo: config -->
+        <div class="sim-panel">
+          <h3>Configuración del Sistema</h3>
+
+          <div class="preset-btns">
+            <button class="preset-btn active" data-preset="ideal">✅ Ideal</button>
+            <button class="preset-btn" data-preset="stress">🔥 Estrés</button>
+            <button class="preset-btn" data-preset="ill">⚠️ Mal Cond.</button>
+          </div>
+
+          <div class="matrix-editor">
+            <h4>Matriz A (3×3)</h4>
+            <div class="matrix-grid" id="matrixInputGrid">
+              <!-- generado por JS -->
+            </div>
+            <h4 style="margin-top:1rem">Vector b</h4>
+            <div class="b-grid" id="bInputGrid">
+              <!-- generado por JS -->
+            </div>
+          </div>
+
+          <div class="method-selector">
+            <h4>Método</h4>
+            <div class="method-btns">
+              <button class="meth-btn active" data-method="lu">LU</button>
+              <button class="meth-btn" data-method="jacobi">Jacobi</button>
+              <button class="meth-btn" data-method="gs">G-Seidel</button>
+              <button class="meth-btn" data-method="sor">SOR</button>
+              <button class="meth-btn" data-method="cg">Grad.Conj.</button>
+              <button class="meth-btn" data-method="pcg">PCG</button>
+            </div>
+          </div>
+
+          <div class="params-row">
+            <div class="param-group">
+              <label>Tolerancia</label>
+              <input type="number" id="tolInput" value="1e-6" step="1e-7" min="1e-12" />
+            </div>
+            <div class="param-group">
+              <label>Max. Iter.</label>
+              <input type="number" id="maxIterInput" value="1000" min="10" max="5000" />
+            </div>
+            <div class="param-group" id="omegaGroup" style="display:none">
+              <label>ω (SOR)</label>
+              <input type="number" id="omegaInput" value="1.25" step="0.05" min="0.1" max="1.99" />
+            </div>
+          </div>
+
+          <button class="run-btn" id="runBtn">▶ Ejecutar Método</button>
+          <button class="run-all-btn" id="runAllBtn">⚡ Ejecutar Todos</button>
+        </div>
+
+        <!-- Panel derecho: resultados -->
+        <div class="sim-results">
+          <div class="results-top">
+            <div class="result-solution" id="solutionDisplay">
+              <h4>Solución x = [x₁, x₂, x₃]</h4>
+              <div class="sol-values" id="solValues">— ejecuta el simulador —</div>
+              <div class="sol-meta" id="solMeta"></div>
+            </div>
+            <div class="result-cond" id="condDisplay">
+              <h4>Número de condición</h4>
+              <div class="cond-value" id="condValue">—</div>
+              <div class="cond-interp" id="condInterp"></div>
+            </div>
+          </div>
+
+          <div class="conv-chart-wrap">
+            <canvas id="convergenceChart"></canvas>
+          </div>
+
+          <div class="iterations-log" id="iterLog">
+            <h4>Log de iteraciones</h4>
+            <div class="log-body" id="logBody">Esperando ejecución...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN: TABLA COMPARATIVA -->
+  <section id="resultados" class="section section-dark">
+    <div class="container">
+      <div class="section-label">05 — Análisis</div>
+      <h2 class="section-title">Tabla Comparativa</h2>
+      <p class="section-intro">Tolerancia 10⁻⁶ · Comparación de iteraciones por escenario</p>
+
+      <div class="table-wrap">
+        <table class="comp-table" id="compTable">
+          <thead>
+            <tr>
+              <th>Método</th>
+              <th>Iter. Ideal</th>
+              <th>Iter. Estrés</th>
+              <th>Iter. Mal Cond.</th>
+              <th>Convergencia</th>
+            </tr>
+          </thead>
+          <tbody id="compTableBody">
+            <!-- llenado por JS -->
+          </tbody>
+        </table>
+      </div>
+      <button class="run-btn" id="fillTableBtn" style="margin-top:1.5rem">📊 Generar tabla completa</button>
+
+      <!-- Interpretación -->
+      <div class="interpretation">
+        <h3>🍔 Interpretación en la Hamburguesería</h3>
+        <div class="interp-grid">
+          <div class="interp-card">
+            <div class="interp-icon">✅</div>
+            <h4>Día Normal (Caso Ideal)</h4>
+            <p>Todos los métodos funcionan bien. LU es la elección óptima por su exactitud. Gauss-Seidel converge en pocas iteraciones. La hamburguesería opera con fluidez.</p>
+          </div>
+          <div class="interp-card">
+            <div class="interp-icon">🔥</div>
+            <h4>Evento Especial (Caso Estrés)</h4>
+            <p>Con alta demanda, SOR con ω óptimo supera a Jacobi/GS. El gradiente conjugado brilla aquí. Necesitamos algoritmos robustos para no quedarnos sin ingredientes.</p>
+          </div>
+          <div class="interp-card">
+            <div class="interp-icon">⚠️</div>
+            <h4>Ingredientes Similares (Mal Cond.)</h4>
+            <p>Jacobi y GS pueden divergir o tardar miles de iteraciones. El PCG con precondicionador Jacobi reduce κ y converge. LU con pivoteo sigue siendo confiable.</p>
+          </div>
+          <div class="interp-card">
+            <div class="interp-icon">📈</div>
+            <h4>Conclusión General</h4>
+            <p>Para una hamburguesería real: usar LU para planificación diaria, PCG para optimización en tiempo real con muchos ingredientes (n grande), y SOR cuando se requiere velocidad iterativa.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3D planes visualization -->
+      <div class="planes-section">
+        <h3>Visualización 3D — Intersección de planos</h3>
+        <p>Cada ecuación del sistema representa un plano en ℝ³. La solución es el punto donde los tres planos se intersectan.</p>
+        <canvas id="planesChart" width="600" height="400"></canvas>
+        <button class="run-btn" id="drawPlanesBtn" style="margin-top:1rem">🎨 Visualizar Planos</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-logo">🍔 BurgerMath</div>
+      <div class="footer-desc">Métodos Numéricos aplicados a la Optimización de Recursos en una Hamburguesería<br>Sistemas lineales · Gradiente Conjugado · Factorización LU</div>
+      <div class="footer-credits">Álgebra Lineal Computacional · Métodos Numéricos</div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
